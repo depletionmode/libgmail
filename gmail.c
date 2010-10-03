@@ -10,6 +10,12 @@
 #define GMAIL_SUCCESS 0
 #define GMAIL_ERR -1
 
+static void _populate_imap_tree(GMAIL *g)
+{
+    // get all folders
+    // iterate and add folders to folders_ll and labels to labels_ll
+}
+
 GMAIL *gmail_init(char *user, char *pass)
 {
   GMAIL *g = malloc( sizeof( GMAIL ) );
@@ -56,6 +62,11 @@ int gmail_connect(GMAIL *g)
 
   D_LOG("Login successful\n");
 
+  g->folders_ll = llist_init();
+  g->labels_ll = llist_init();
+
+  _populate_imap_tree( g );
+
   return GMAIL_SUCCESS;
 
 error:
@@ -65,4 +76,7 @@ error:
 void gmail_disconnect(GMAIL *g)
 {
   dal_kill( g->dal );
+
+  llist_kill( g->folders_ll );
+  llist_kill( g->labels_ll );
 }
