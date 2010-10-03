@@ -9,7 +9,14 @@ LLIST *llist_init()
 
 void llist_kill(LLIST *l)
 {
-    // todo: empty list
+    LLIST_ITER *iter;
+    void *obj;
+    
+    if( ( obj = llist_iterator_init( l, iter ) ) )
+        do {
+            N_FREE(obj);
+        } while ( obj = llist_remove_and_iterate( iter ) );
+
     N_FREE(l);
 }
 
