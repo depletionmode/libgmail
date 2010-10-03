@@ -7,10 +7,13 @@
 
 #include "dal.h"
 
+#define GMAIL_HOST "imap.gmail.com"
+#define GMAIL_PORT 993
+
 typedef struct gmail {
   char *user,
        *pass;
-  int connected;
+  DAL *dal;
 } GMAIL;
 
 typedef struct gmail_folder {
@@ -25,7 +28,7 @@ GMAIL *gmail_init(char *user, char *pass);
 void gmail_kill(GMAIL *g);
 
 int gmail_connect(GMAIL *g);
-int gmail_disconnect(GMAIL *g);
+void gmail_disconnect(GMAIL *g);
 
 //llist *gmail_get_folders(GMAIL *g);
 //llist *gmail_get_messages(GMAIL_FOLDER *folder, char *label);
