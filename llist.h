@@ -20,6 +20,6 @@ void llist_kill(LLIST *l);
 
 void llist_append(LLIST *l, void *obj);
 
-void *llist_iterator_init(LLIST *l);
+void *llist_iterator_init(LLIST *l, LLIST_ITER *iter);
 void *llist_iterate(LLIST_ITER *iter);
 void *llist_remove_and_iterate(LLIST_ITER *iter);

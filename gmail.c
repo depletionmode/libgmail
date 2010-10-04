@@ -10,10 +10,102 @@
 #define GMAIL_SUCCESS 0
 #define GMAIL_ERR -1
 
-static void _populate_imap_tree(GMAIL *g)
+static GMAIL_FOLDER *_folder_lookup(GMAIL *g, char *name)
 {
-    // get all folders
-    // iterate and add folders to folders_ll and labels to labels_ll
+    GMAIL_FOLDER *folder;
+    LLIST_ITER *iter;
+
+    if( ( folder = llist_iterator_init( g->folders_ll, iter ) ) )
+        do {
+            if( !strcmp( folder->name, name ) )
+                break;
+        } while( folder = llist_iterate( iter ) );
+
+    return folder;
+}
+
+static int _is_special_folder(GMAIL_FOLDER folder)
+{
+    char *folder_list[] = {
+        "INBOX",
+        "Junk E-mail",
+        "Sent Items",
+        "Deleted Items",
+        "Drafts"
+    }
+
+    int i;
+
+    for( i = 0; i < 5; i++)
+        if( !strcmp( folder_list[i], folder->name ) )
+            return 1;
+
+    return 0;
+}
+
+static void _populate_folder_tree(GMAIL *g)
+{
+    int err;
+    char buf[MAX_LINELEN];
+    char cmd[] = ". list \"\" \"*\"\n";
+
+    memset( buf, 0, MAX_LINELEN );
+
+    dal_write( g->dal, cmd, strlen( cmd ) );
+    while ( err = dal_readmatch( g->dal, buf, MAX_LINELEN, "\n" ) ) {
+        GMAIL *folder;
+        char *ptr;
+        int len;
+
+        if( !( ptr = strstr( buf, "\"/\"" ) ) )
+            break;
+
+        ptr += 5;
+
+        folder = calloc( 1, sizeof( GMAIL_FOLDER ) );
+
+        if( strstr( ptr, "[" ) ) {
+            ptr++;
+            len = ptr - strstr( ptr, "]/" );
+
+            folder->prefix = calloc( 1, len + 1 );
+            memcpy( folder->prefix, ptr, len );
+
+            ptr += len + 2;
+        }
+        
+        len = ptr - strstr( ptr, "\"" );
+
+        folder->name = calloc( 1, len + 1 );
+        memcpy( folder->name, ptr, len );
+        
+        if( !_is_special_folder( *folder ) || folder->prefix )   /* is a folder */
+            llist_append( g->labels_ll, folder );
+        else {    /* is a label */
+            llist_append( g->folders_ll, folder->name );
+
+            N_FREE( folder->prefix );
+            N_FREE( folder );
+        }
+    }
+
+#ifdef DEBUG
+    LLIST_ITER *iter;
+    D_LOG( "folders:\n" );    
+    if( ( folder = llist_iterator_init( g->folders_ll, iter ) ) )
+        do {
+            D_LOG( "%s/%s\n", folder->prefix, folder->name );
+        } while ( folder = llist_iterate( iter ) );
+    D_LOG( "-----\n" );
+
+    char *label;
+    D_LOG( "labels:\n");
+    if( ( label = llist_iterator_init( g->labels_ll, iter ) ) )
+        do {
+            D_LOG( "%s\n", label );
+        } while ( label = llist_iterate( iter ) );
+    D_LOG( "-----\n" );
+#endif
 }
 
 GMAIL *gmail_init(char *user, char *pass)
@@ -65,7 +157,7 @@ int gmail_connect(GMAIL *g)
   g->folders_ll = llist_init();
   g->labels_ll = llist_init();
 
-  _populate_imap_tree( g );
+  _populate_folder_tree( g );
 
   return GMAIL_SUCCESS;
 

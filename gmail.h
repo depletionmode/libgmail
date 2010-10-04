@@ -40,7 +40,14 @@ typedef struct gmail_msg {
        *subject,
        *body;
   GMAIL_FOLDER folder;
+  int flags;
 } GMAIL_MSG;
+
+enum flags {
+    STARRED = 1,
+    IMPORTANT = 2,
+    SPAM = 4
+};
 
 GMAIL *gmail_init(char *user, char *pass);  /* init library obj */
 void gmail_kill(GMAIL *g);                  /* free library obj */
@@ -60,14 +67,11 @@ int gmail_label_edit(GMAIL *g, char *label,     /* rename a label */
                      char *new_label);
 int gmail_label_delete(GMAIL *g, char *label);  /* delete an existing label */
 
+int gmail_msg_set_flags(GMAIL_MSG *m, int flags);      /* set message flags */
+int gmail_msg_unset_flags(GMAIL_MSG *m, int flags);    /* unset message flags */
+
 int gmail_msg_set_label(GMAIL_MSG *m);      /* tag a message with a label */
 int gmail_msg_unset_label(GMAIL_MSG *m);    /* untag a message from a label */
-
-int gmail_msg_set_starred(GMAIL_MSG *m);    /* set a message as starred */
-int gmail_msg_unset_starred(GMAIL_MSG *m);  /* unset a mesage as starred */
-
-int gmail_msg_set_spam(GMAIL_MSG *m);       /* mark a message as spam */
-int gmail_msg_unset_spam(GMAIL_MSG *m);     /* unmark a message as spam */
 
 int gmail_msg_bin(GMAIL_MSG *m);    /* send a message to the bin */
 
