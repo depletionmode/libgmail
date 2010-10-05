@@ -1,4 +1,13 @@
 libgmail - a C interface library for GMail
 ==========================================
+Released under GPLv3
+by David Kaplan, 2010 <david@2of1.org>
+
+Once upon a time someone (Waseem Daher?) wrote a Python library by the same
+name that provided an interface for gmail interaction.
+That library unfortunately no longer works.
+More unfortunately it was written in Python. 
+
+This project provides a (hopefully) easy to use interface for gmail access and it's all in C and works through the Gmail imap interface.
 
 
